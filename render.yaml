@@ -1,7 +1,14 @@
+databases:
+  - name: task-tracker-db
+    plan: free
+    databaseName: task_tracker
+    user: task_tracker
+
 services:
   - type: web
     name: task-tracker-api
     runtime: node
+    plan: free
     buildCommand: npm install
     startCommand: npm start
     envVars:
@@ -9,3 +16,7 @@ services:
         value: production
       - key: PORT
         value: 3000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: task-tracker-db
+          property: connectionString

@@ -1,46 +1,12 @@
-const fs = require('fs');
-const path = require('path');
+const jsonStore = require('./jsonStore');
+const pgStore = require('./pgStore');
 
-const DATA_FILE = path.join(
-    __dirname,
-    process.env.NODE_ENV === 'test' ? 'tasks.test.json' : 'tasks.json'
-);
-
-const DEFAULT_TASKS = [
-    { id: 1, title: 'Task 1', description: 'Task 1 description', completed: false },
-    { id: 2, title: 'Task 2', description: 'Task 2 description', completed: false },
-    { id: 3, title: 'Task 3', description: 'Task 3 description', completed: false },
-    { id: 4, title: 'Task 4', description: 'Task 4 description', completed: false },
-    { id: 5, title: 'Task 5', description: 'Task 5 description', completed: false }
-];
-
-function loadTasks() {
-    if (!fs.existsSync(DATA_FILE)) {
-        saveTasks(DEFAULT_TASKS);
-        return [...DEFAULT_TASKS];
-    }
-
-    const raw = fs.readFileSync(DATA_FILE, 'utf8');
-    return JSON.parse(raw);
+function usePostgres() {
+    return Boolean(process.env.DATABASE_URL);
 }
 
-function saveTasks(tasks) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(tasks, null, 2));
-}
-
-function getNextId(tasks) {
-    if (tasks.length === 0) {
-        return 1;
-    }
-    return Math.max(...tasks.map((task) => task.id)) + 1;
-}
-
-function findTaskById(tasks, id) {
-    return tasks.find((task) => task.id === id);
-}
-
-function findTaskIndexById(tasks, id) {
-    return tasks.findIndex((task) => task.id === id);
+function getStore() {
+    return usePostgres() ? pgStore : jsonStore;
 }
 
 function parseTaskId(rawId) {
@@ -51,13 +17,46 @@ function parseTaskId(rawId) {
     return id;
 }
 
-const tasks = loadTasks();
+async function initStore() {
+    const store = getStore();
+    if (usePostgres()) {
+        await store.initPgStore();
+    } else {
+        await store.initJsonStore();
+    }
+}
+
+async function getAllTasks() {
+    return getStore().getAllTasks();
+}
+
+async function getTaskById(id) {
+    return getStore().getTaskById(id);
+}
+
+async function createTask(title, description) {
+    return getStore().createTask(title, description);
+}
+
+async function updateTaskCompleted(id, completed) {
+    return getStore().updateTaskCompleted(id, completed);
+}
+
+async function deleteTask(id) {
+    return getStore().deleteTask(id);
+}
+
+function getStorageType() {
+    return usePostgres() ? 'postgres' : 'json';
+}
 
 module.exports = {
-    tasks,
-    saveTasks,
-    getNextId,
-    findTaskById,
-    findTaskIndexById,
-    parseTaskId
+    initStore,
+    getAllTasks,
+    getTaskById,
+    createTask,
+    updateTaskCompleted,
+    deleteTask,
+    parseTaskId,
+    getStorageType
 };

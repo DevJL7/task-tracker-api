@@ -15,7 +15,7 @@ API REST + frontend + CI/CD en GitHub + deploy en Render.
 | API | Express + Node | https://task-tracker-api-bphv.onrender.com |
 | Frontend | Vite (vanilla JS) | Vercel (tú despliegas) |
 | CI | GitHub Actions | `.github/workflows/ci.yml` |
-| Datos | JSON (local) / efímero (Render) | — |
+| Datos | PostgreSQL (Render) / JSON (local) | Ver DEVOPS-PRO.md |
 
 ---
 
@@ -77,15 +77,16 @@ Cada push a `main` actualiza frontend y API por separado.
 
 ---
 
-## 5. Fase siguiente (producción real)
+## 5. Fase pro (implementada en código)
 
-| Mejora | Para qué |
-|--------|----------|
-| PostgreSQL en Render | Datos permanentes |
-| Rama `develop` + PRs | Flujo de equipo |
-| Sentry / logs | Monitoreo errores |
+Ver **[DEVOPS-PRO.md](./DEVOPS-PRO.md)** para los pasos que ejecutas tú en Render y GitHub.
 
----
+| Mejora | Estado |
+|--------|--------|
+| PostgreSQL | Código listo — falta `DATABASE_URL` en Render |
+| Rama `develop` + PRs | Guía en DEVOPS-PRO.md |
+| Sentry / logs | Pendiente (futuro) |
+
 
 ## Endpoints API
 

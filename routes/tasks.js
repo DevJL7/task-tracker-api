@@ -1,81 +1,91 @@
 const router = require('express').Router();
 const {
-    tasks,
-    saveTasks,
-    getNextId,
-    findTaskById,
-    findTaskIndexById,
+    getAllTasks,
+    getTaskById,
+    createTask,
+    updateTaskCompleted,
+    deleteTask,
     parseTaskId
 } = require('../data/store');
 
-router.get('/', (req, res) => {
-    res.json(tasks);
+router.get('/', async (req, res, next) => {
+    try {
+        const tasks = await getAllTasks();
+        res.json(tasks);
+    } catch (error) {
+        next(error);
+    }
 });
 
-router.get('/:id', (req, res) => {
-    const id = parseTaskId(req.params.id);
-    if (id === null) {
-        return res.status(400).json({ error: 'Invalid task id' });
-    }
+router.get('/:id', async (req, res, next) => {
+    try {
+        const id = parseTaskId(req.params.id);
+        if (id === null) {
+            return res.status(400).json({ error: 'Invalid task id' });
+        }
 
-    const task = findTaskById(tasks, id);
-    if (!task) {
-        return res.status(404).json({ error: 'Task not found' });
+        const task = await getTaskById(id);
+        if (!task) {
+            return res.status(404).json({ error: 'Task not found' });
+        }
+        res.json(task);
+    } catch (error) {
+        next(error);
     }
-    res.json(task);
 });
 
-router.post('/', (req, res) => {
-    if (!req.body?.title?.trim() || !req.body?.description?.trim()) {
-        return res.status(400).json({ error: 'Title and description are required' });
+router.post('/', async (req, res, next) => {
+    try {
+        if (!req.body?.title?.trim() || !req.body?.description?.trim()) {
+            return res.status(400).json({ error: 'Title and description are required' });
+        }
+
+        const newTask = await createTask(
+            req.body.title.trim(),
+            req.body.description.trim()
+        );
+        res.status(201).json(newTask);
+    } catch (error) {
+        next(error);
     }
-
-    const newTask = {
-        id: getNextId(tasks),
-        title: req.body.title.trim(),
-        description: req.body.description.trim(),
-        completed: false
-    };
-
-    tasks.push(newTask);
-    saveTasks(tasks);
-    res.status(201).json(newTask);
 });
 
-router.patch('/:id', (req, res) => {
-    const id = parseTaskId(req.params.id);
-    if (id === null) {
-        return res.status(400).json({ error: 'Invalid task id' });
-    }
+router.patch('/:id', async (req, res, next) => {
+    try {
+        const id = parseTaskId(req.params.id);
+        if (id === null) {
+            return res.status(400).json({ error: 'Invalid task id' });
+        }
 
-    if (typeof req.body.completed !== 'boolean') {
-        return res.status(400).json({ error: 'completed must be a boolean' });
-    }
+        if (typeof req.body.completed !== 'boolean') {
+            return res.status(400).json({ error: 'completed must be a boolean' });
+        }
 
-    const task = findTaskById(tasks, id);
-    if (!task) {
-        return res.status(404).json({ error: 'Task not found' });
+        const task = await updateTaskCompleted(id, req.body.completed);
+        if (!task) {
+            return res.status(404).json({ error: 'Task not found' });
+        }
+        res.json(task);
+    } catch (error) {
+        next(error);
     }
-
-    task.completed = req.body.completed;
-    saveTasks(tasks);
-    res.json(task);
 });
 
-router.delete('/:id', (req, res) => {
-    const id = parseTaskId(req.params.id);
-    if (id === null) {
-        return res.status(400).json({ error: 'Invalid task id' });
-    }
+router.delete('/:id', async (req, res, next) => {
+    try {
+        const id = parseTaskId(req.params.id);
+        if (id === null) {
+            return res.status(400).json({ error: 'Invalid task id' });
+        }
 
-    const index = findTaskIndexById(tasks, id);
-    if (index === -1) {
-        return res.status(404).json({ error: 'Task not found' });
+        const deleted = await deleteTask(id);
+        if (!deleted) {
+            return res.status(404).json({ error: 'Task not found' });
+        }
+        res.status(204).send();
+    } catch (error) {
+        next(error);
     }
-
-    tasks.splice(index, 1);
-    saveTasks(tasks);
-    res.status(204).send();
 });
 
 module.exports = router;

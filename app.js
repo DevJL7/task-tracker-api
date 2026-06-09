@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 
+const { getStorageType } = require('./data/store');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -24,7 +25,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok' });
+    res.json({ status: 'ok', storage: getStorageType() });
 });
 
 app.use('/tasks', require('./routes/tasks'));
