@@ -1,7 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_FILE = path.join(__dirname, 'tasks.json');
+const DATA_FILE = path.join(
+    __dirname,
+    process.env.NODE_ENV === 'test' ? 'tasks.test.json' : 'tasks.json'
+);
 
 const DEFAULT_TASKS = [
     { id: 1, title: 'Task 1', description: 'Task 1 description', completed: false },

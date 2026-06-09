@@ -1,13 +1,27 @@
-# Task Tracker API
+# Task Tracker — Flujo DevOps completo
 
-REST API con Express para gestionar tareas. Persistencia en archivo JSON.
+API REST + frontend + CI/CD en GitHub + deploy en Render.
 
-## Requisitos
+## Arquitectura
 
-- Node.js 18+
-- npm
+```text
+[Dev local]  →  git push  →  [GitHub]  →  CI (tests)  →  [Render API]
+                                                                    ↑
+[Dev local]  →  git push  →  [GitHub]  →  [Vercel Frontend]  ─────┘
+```
 
-## Instalación local
+| Capa | Tecnología | URL |
+|------|------------|-----|
+| API | Express + Node | https://task-tracker-api-bphv.onrender.com |
+| Frontend | Vite (vanilla JS) | Vercel (tú despliegas) |
+| CI | GitHub Actions | `.github/workflows/ci.yml` |
+| Datos | JSON (local) / efímero (Render) | — |
+
+---
+
+## 1. Desarrollo local
+
+### API
 
 ```bash
 npm install
@@ -15,45 +29,72 @@ cp .env.example .env
 npm run dev
 ```
 
-La API queda en `http://localhost:3000` (o el `PORT` de tu `.env`).
+### Frontend
 
-## Endpoints
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/health` | Estado del servicio |
-| GET | `/tasks` | Listar tareas |
-| GET | `/tasks/:id` | Obtener una tarea |
-| POST | `/tasks` | Crear tarea |
-| PATCH | `/tasks/:id` | Actualizar `completed` |
-| DELETE | `/tasks/:id` | Eliminar tarea |
-
-### POST `/tasks`
-
-```json
-{ "title": "Mi tarea", "description": "Detalle" }
+```bash
+cd client
+npm install
+cp .env.example .env
+npm run dev
 ```
 
-### PATCH `/tasks/:id`
+Abre http://localhost:5173 — apunta a tu API en Render (o cambia `.env` a `http://localhost:3000`).
 
-```json
-{ "completed": true }
+---
+
+## 2. Tests + CI (automático)
+
+```bash
+npm test
 ```
 
-## Estructura
+Cada `git push` a `main` ejecuta GitHub Actions (tests). Si fallan, no merges hasta arreglar.
 
-```text
-├── index.js
-├── routes/tasks.js
-├── data/store.js
-├── data/tasks.json
-├── middleware/errorHandler.js
-└── .env
+---
+
+## 3. Deploy API (Render) — ya hecho
+
+```bash
+git add .
+git commit -m "tu cambio"
+git push
 ```
 
-## Scripts
+Render redeploya solo. URL: https://task-tracker-api-bphv.onrender.com
 
-| Comando | Uso |
-|---------|-----|
-| `npm run dev` | Desarrollo con nodemon |
-| `npm start` | Producción |
+---
+
+## 4. Deploy frontend (Vercel) — tú ejecutas
+
+1. [vercel.com](https://vercel.com) → login con GitHub
+2. **Add New Project** → repo `task-tracker-api`
+3. **Root Directory:** `client`
+4. **Framework:** Vite
+5. **Environment Variable:** `VITE_API_URL` = `https://task-tracker-api-bphv.onrender.com`
+6. Deploy
+
+Cada push a `main` actualiza frontend y API por separado.
+
+---
+
+## 5. Fase siguiente (producción real)
+
+| Mejora | Para qué |
+|--------|----------|
+| PostgreSQL en Render | Datos permanentes |
+| Rama `develop` + PRs | Flujo de equipo |
+| Sentry / logs | Monitoreo errores |
+
+---
+
+## Endpoints API
+
+| Método | Ruta |
+|--------|------|
+| GET | `/` |
+| GET | `/health` |
+| GET | `/tasks` |
+| GET | `/tasks/:id` |
+| POST | `/tasks` |
+| PATCH | `/tasks/:id` |
+| DELETE | `/tasks/:id` |

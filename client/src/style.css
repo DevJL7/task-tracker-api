@@ -1,0 +1,91 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+.app {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+header {
+    margin-bottom: 1.5rem;
+}
+
+h1 {
+    margin: 0 0 0.5rem;
+}
+
+#status {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+#task-form {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+input {
+    padding: 0.75rem 1rem;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: #1e293b;
+    color: inherit;
+}
+
+button {
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: #3b82f6;
+    color: white;
+    cursor: pointer;
+}
+
+button.delete {
+    background: #ef4444;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+}
+
+li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #1e293b;
+    border-radius: 8px;
+}
+
+li.done strong,
+li.done span {
+    opacity: 0.6;
+    text-decoration: line-through;
+}
+
+label {
+    display: grid;
+    gap: 0.25rem;
+}
+
+span {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
