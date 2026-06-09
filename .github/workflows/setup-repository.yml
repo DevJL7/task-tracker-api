@@ -1,0 +1,68 @@
+name: Setup Repository
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  administration: write
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create develop branch if missing
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            try {
+              await github.rest.git.getRef({ owner, repo, ref: 'heads/develop' });
+              core.info('Branch develop already exists');
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              const main = await github.rest.git.getRef({ owner, repo, ref: 'heads/main' });
+              await github.rest.git.createRef({
+                owner,
+                repo,
+                ref: 'refs/heads/develop',
+                sha: main.data.object.sha
+              });
+              core.info('Created branch develop');
+            }
+
+      - name: Protect main branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const contexts = ['test', 'CI / test'];
+
+            try {
+              await github.rest.repos.updateBranchProtection({
+                owner,
+                repo,
+                branch: 'main',
+                required_status_checks: {
+                  strict: true,
+                  contexts
+                },
+                enforce_admins: false,
+                required_pull_request_reviews: {
+                  required_approving_review_count: 0,
+                  dismiss_stale_reviews: false
+                },
+                restrictions: null,
+                allow_force_pushes: false,
+                allow_deletions: false
+              });
+              core.info('Branch protection enabled on main');
+            } catch (error) {
+              core.setFailed(
+                'Could not protect main. Enable Settings → Actions → General → ' +
+                'Workflow permissions → Read and write permissions, then re-run this workflow.'
+              );
+              throw error;
+            }

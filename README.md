@@ -1,25 +1,40 @@
 # Task Tracker — Flujo DevOps completo
 
-API REST + frontend + CI/CD en GitHub + deploy en Render.
+App full-stack desplegada: frontend en Vercel, API en Render, datos en PostgreSQL.
+
+## Producción
+
+| Capa | URL |
+|------|-----|
+| **App (frontend)** | https://task-tracker-m4wazl7ve-dev-ops12.vercel.app |
+| **API** | https://task-tracker-api-bphv.onrender.com |
+| **Health** | https://task-tracker-api-bphv.onrender.com/health |
+| **Repo** | https://github.com/DevJL7/task-tracker-api |
+
+```bash
+curl https://task-tracker-api-bphv.onrender.com/health
+# {"status":"ok","storage":"postgres"}
+```
 
 ## Arquitectura
 
 ```text
-[Dev local]  →  git push  →  [GitHub]  →  CI (tests)  →  [Render API]
-                                                                    ↑
-[Dev local]  →  git push  →  [GitHub]  →  [Vercel Frontend]  ─────┘
+Usuario → Vercel (UI) → Render (API) → PostgreSQL
+              ↑              ↑
+         git push       git push
+              └──── GitHub + CI ────┘
 ```
 
-| Capa | Tecnología | URL |
-|------|------------|-----|
-| API | Express + Node | https://task-tracker-api-bphv.onrender.com |
-| Frontend | Vite (vanilla JS) | Vercel (tú despliegas) |
-| CI | GitHub Actions | `.github/workflows/ci.yml` |
-| Datos | PostgreSQL (Render) / JSON (local) | Ver DEVOPS-PRO.md |
+| Capa | Tecnología |
+|------|------------|
+| Frontend | Vite + vanilla JS (Vercel) |
+| API | Express + Node (Render) |
+| Datos | PostgreSQL (Render) / JSON (local sin `DATABASE_URL`) |
+| CI | GitHub Actions → `npm test` |
 
 ---
 
-## 1. Desarrollo local
+## Desarrollo local
 
 ### API
 
@@ -38,55 +53,30 @@ cp .env.example .env
 npm run dev
 ```
 
-Abre http://localhost:5173 — apunta a tu API en Render (o cambia `.env` a `http://localhost:3000`).
+Abre http://localhost:5173
 
 ---
 
-## 2. Tests + CI (automático)
+## Flujo de cambios (equipo)
+
+```text
+feature → PR a develop → CI pasa → merge
+develop → PR a main     → merge → Render + Vercel redeploy
+```
+
+`main` se protege sola con el workflow [.github/workflows/setup-repository.yml](./.github/workflows/setup-repository.yml) (PR + CI obligatorio).
+
+Guías: [DEVOPS-PRO.md](./DEVOPS-PRO.md) · [VERCEL.md](./VERCEL.md)
+
+---
+
+## Tests
 
 ```bash
 npm test
 ```
 
-Cada `git push` a `main` ejecuta GitHub Actions (tests). Si fallan, no merges hasta arreglar.
-
 ---
-
-## 3. Deploy API (Render) — ya hecho
-
-```bash
-git add .
-git commit -m "tu cambio"
-git push
-```
-
-Render redeploya solo. URL: https://task-tracker-api-bphv.onrender.com
-
----
-
-## 4. Deploy frontend (Vercel) — tú ejecutas
-
-1. [vercel.com](https://vercel.com) → login con GitHub
-2. **Add New Project** → repo `task-tracker-api`
-3. **Root Directory:** `client`
-4. **Framework:** Vite
-5. **Environment Variable:** `VITE_API_URL` = `https://task-tracker-api-bphv.onrender.com`
-6. Deploy
-
-Cada push a `main` actualiza frontend y API por separado.
-
----
-
-## 5. Fase pro (implementada en código)
-
-Ver **[DEVOPS-PRO.md](./DEVOPS-PRO.md)** para los pasos que ejecutas tú en Render y GitHub.
-
-| Mejora | Estado |
-|--------|--------|
-| PostgreSQL | Código listo — falta `DATABASE_URL` en Render |
-| Rama `develop` + PRs | Guía en DEVOPS-PRO.md |
-| Sentry / logs | Pendiente (futuro) |
-
 
 ## Endpoints API
 
