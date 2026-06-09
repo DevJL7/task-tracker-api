@@ -13,14 +13,27 @@
 
 ## Automatización en GitHub
 
-Al hacer push a `main`, el workflow **Setup Repository**:
+| Workflow | Qué hace |
+|----------|----------|
+| **Setup Repository** | Crea rama `develop` (auto en push a `main`) |
+| **Protect Main Branch** | Protege `main` (manual, 1 vez) |
+| **CI** | `npm test` en PRs |
 
-1. Crea la rama `develop` si no existe
-2. Protege `main` (PR obligatorio + CI `test`)
+### Proteger `main` (1 vez, ~2 min)
 
-**Requisito único (una vez):** repo → **Settings** → **Actions** → **General** → **Workflow permissions** → **Read and write permissions** → Save.
+GitHub **no permite** que el token normal de Actions cambie reglas de rama. Opciones:
 
-Si el workflow falla por permisos, activa eso y en **Actions** → **Setup Repository** → **Re-run all jobs**.
+**Opción A — PAT + workflow (automático tras configurar secret)**
+
+1. GitHub → **Settings** → **Developer settings** → **Fine-grained tokens** → **Generate**
+2. Repo: `task-tracker-api` · Permission: **Administration: Read and write**
+3. Repo → **Settings** → **Secrets and variables** → **Actions** → **New secret**
+   - Name: `REPO_SETUP_TOKEN` · Value: el PAT
+4. **Actions** → **Protect Main Branch** → **Run workflow**
+
+**Opción B — UI (sin PAT)**
+
+Repo → **Settings** → **Branches** → **Add rule** → pattern `main` → Require PR + status check `CI / test`
 
 ---
 

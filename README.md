@@ -64,7 +64,7 @@ feature → PR a develop → CI pasa → merge
 develop → PR a main     → merge → Render + Vercel redeploy
 ```
 
-`main` se protege sola con el workflow [.github/workflows/setup-repository.yml](./.github/workflows/setup-repository.yml) (PR + CI obligatorio).
+`main` se protege con el workflow **Protect Main Branch** o desde GitHub Settings (ver [DEVOPS-PRO.md](./DEVOPS-PRO.md)).
 
 Guías: [DEVOPS-PRO.md](./DEVOPS-PRO.md) · [VERCEL.md](./VERCEL.md)
 
